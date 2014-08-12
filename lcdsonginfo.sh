@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 ### BEGIN INIT INFO
 # Provides:          myservice
@@ -11,9 +11,9 @@
 ### END INIT INFO
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
-DIR=/home/pi/Adafruit-Raspberry-Pi-Python-Code/Adafruit_CharLCDPlate
-DAEMON=$DIR/lcdSongInfo.py
-DAEMON_NAME=lcdSongInfo
+DIR=/home/pi/lcdsonginfo
+DAEMON=$DIR/lcdsonginfo.py
+DAEMON_NAME=lcdsonginfo
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
