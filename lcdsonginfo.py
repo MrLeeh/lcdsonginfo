@@ -7,6 +7,7 @@
 
 import subprocess
 import textwrap
+import threading
 from time import sleep
 from adafruit.Adafruit_CharLCDPlate import Adafruit_CharLCDPlate
 
@@ -24,6 +25,11 @@ def _utf8_to_lcd(s):
     out = out.replace('ü', '\xf5')
     out = out.replace('Ü', '\xf5')
     return out
+
+
+def turn_bl_off(*args):
+    lcd = args[0]
+    lcd.backlight(lcd.OFF)
 
 
 class TextScroller:
@@ -61,7 +67,7 @@ lcd = Adafruit_CharLCDPlate()
 lcd.begin(16,2)
 lcd.clear()
 lcd.backlight(lcd.ON)
-
+tmr = None
 # Poll buttons
 btn = (lcd.LEFT, lcd.UP, lcd.DOWN, lcd.RIGHT, lcd.SELECT)
 
@@ -69,6 +75,7 @@ lastArtistSong = ''
 scroller = TextScroller('', 16)
 
 while True:
+
     # Get current status and playtime
     process = subprocess.Popen('mpc', shell=True, stdout=subprocess.PIPE)
     status = process.communicate()[0]
@@ -102,6 +109,10 @@ while True:
         infoLine = infoLine.split('%',1)[0].strip()
         times = ('TM=' + times + ' Vol=' + infoLine + '%')
     else:
+        if tmr is None:
+            tmr = threading.Timer(10.0, turn_bl_off, [lcd])
+            tmr.start()
+
         songName = ''
         playStatus = '[stopped]'
         times = '0:00/0:00 (0%)'
@@ -134,6 +145,11 @@ while True:
     for i in range (0, 5):
         for b in btn:
             if lcd.buttonPressed(b):
+                
+                if isinstance(tmr, threading._Timer):
+                    lcd.backlight(lcd.ON)
+                    tmr.cancel()
+                    tmr = None
                 if b is lcd.RIGHT:
                     subprocess.Popen('mpc next', shell=True)
                     sleep(0.2) # Sleep a little extra to avoid dubble registrations
